@@ -8,8 +8,18 @@ import { Config, config } from "../config";
 
 const nodeIds = new Set<string>();
 
+const subscriptions = new Map<
+  string,
+  Config["topics"][number]["subscriptions"][number] & { topicName: string }
+>();
+
 config.topics.forEach((topic) => {
   topic.subscriptions.forEach((sub) => {
+    subscriptions.set(sub.name, {
+      ...sub,
+      topicName: topic.name,
+    });
+
     sub.partitions.forEach((part) => {
       nodeIds.add(part.node);
     });
@@ -95,28 +105,20 @@ const router = t.router({
   getMessages: t.procedure
     .input(z.object({ subscriptionName: z.string(), batchSize: z.number() }))
     .query(async (req) => {
-      let sub: Config["topics"][number]["subscriptions"][number];
+      const subscription = subscriptions.get(req.input.subscriptionName);
 
-      config.topics.forEach((a) => {
-        a.subscriptions.forEach((s) => {
-          // TODO
-          if (s.name === req.input.subscriptionName) {
-            sub = s;
-          }
-        });
-      });
-
-      // @ts-ignore
-      if (!sub) {
+      if (!subscription) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `Could not find subscription with name: ${req.input.subscriptionName}`,
         });
       }
 
-      const partitionIndex = Math.floor(Math.random() * sub.partitions.length);
+      const partitionIndex = Math.floor(
+        Math.random() * subscription.partitions.length
+      );
 
-      const partition = sub.partitions[partitionIndex];
+      const partition = subscription.partitions[partitionIndex];
 
       const msgs = await nodes.get(partition.node)!.getMessages.query({
         batchSize: req.input.batchSize,
@@ -130,7 +132,34 @@ const router = t.router({
   ack: t.procedure
     .input(z.object({ receiptId: z.string() }))
     .mutation(async (req) => {
-      console.log("ack::req", req);
+      const [subscriptionId, partitionId, messageId] =
+        req.input.receiptId.split("-");
+
+      const subscription = subscriptions.get(subscriptionId);
+
+      if (!subscription) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Could not find subscription with name: ${subscriptionId} for receiptId: "${req.input.receiptId}"`,
+        });
+      }
+
+      const partition = subscription.partitions.find(
+        (p) => p.id === partitionId
+      );
+
+      if (!partition) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Could not find partition with id: ${partitionId} for receiptId: "${req.input.receiptId}"`,
+        });
+      }
+
+      await nodes.get(partition.node)?.ack.mutate({
+        messageId,
+        subscriptionId,
+        partitionKey: partition.id,
+      });
     }),
 
   modifyAckDeadline: t.procedure
@@ -138,7 +167,35 @@ const router = t.router({
       z.object({ receiptId: z.string(), deadlineMilliseconds: z.number() })
     )
     .mutation(async (req) => {
-      console.log("modifyAckDeadline::req", req);
+      const [subscriptionId, partitionId, messageId] =
+        req.input.receiptId.split("-");
+
+      const subscription = subscriptions.get(subscriptionId);
+
+      if (!subscription) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Could not find subscription with name: ${subscriptionId} for receiptId: "${req.input.receiptId}"`,
+        });
+      }
+
+      const partition = subscription.partitions.find(
+        (p) => p.id === partitionId
+      );
+
+      if (!partition) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Could not find partition with id: ${partitionId} for receiptId: "${req.input.receiptId}"`,
+        });
+      }
+
+      await nodes.get(partition.node)?.modifyAckDeadline.mutate({
+        messageId,
+        subscriptionId,
+        partitionKey: partition.id,
+        deadlineMilliseconds: req.input.deadlineMilliseconds,
+      });
     }),
 });
 
