@@ -3,23 +3,20 @@ import { Message } from "../../Message";
 import { Config } from "../config";
 import { clearTimeout } from "timers";
 
-const DB_MAINTENANCE_PERIOD = 10 * 1000;
+const DB_MAINTENANCE_PERIOD = 1000;
 
 export class MessagesDb {
   private pendingMessages: Message[] = []; // stored in order from oldest -> newest
   private inFlightMessages = new Map<string, Message>(); // message id -> message
   public oldestMessageTimestamp: null | number = null; // unix ms
-  private maintenanceTimer: NodeJS.Timer;
+  private maintenanceTimer!: NodeJS.Timer;
 
   constructor(
     public partitionId: string,
     public subscriptionConfig: Config["topics"][0]["subscriptions"][0]
   ) {
-    // configure timers to perform maintenance
-    this.maintenanceTimer = setInterval(
-      () => this.doMaintenance(),
-      DB_MAINTENANCE_PERIOD
-    );
+    // do initial maintenance, this also starts the regular timer
+    this.doMaintenance();
   }
   public destroy() {
     clearTimeout(this.maintenanceTimer);
@@ -77,10 +74,6 @@ export class MessagesDb {
   }
 
   public doMaintenance() {
-    console.log(
-      `Performing maintenance for DB: ${this.subscriptionConfig.name}-${this.partitionId}`
-    );
-
     // find elapsed in-flight messages and move them back to the pending items queue
     const now = Date.now();
     for (const message of this.inFlightMessages.values()) {
@@ -99,6 +92,9 @@ export class MessagesDb {
           continue;
         }
 
+        console.log(
+          `Message ${message.id} exceeded ack deadline, re-enqueuing`
+        );
         this.pendingMessages.push(message);
       }
     }
@@ -108,5 +104,12 @@ export class MessagesDb {
       this.pendingMessages.length === 0
         ? null
         : Math.min(...this.pendingMessages.map((x) => x.createdDate));
+
+    // re-enqueue maintenance worker
+    setTimeout(
+      () => this.doMaintenance(),
+      // add some fuzz to avoid all partitions running in lock-step
+      DB_MAINTENANCE_PERIOD + (Math.random() * DB_MAINTENANCE_PERIOD) / 2
+    );
   }
 }
