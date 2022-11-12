@@ -4,13 +4,13 @@ import type { AppRouter } from "../router";
 const client = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: "http://localhost:2022",
+      url: "http://router-1:2022",
     }),
   ],
 });
 
 async function main() {
-  const result = await client.zod.mutate({ name: "jye" });
+  const result = await client.zod.mutate({ name: "aaa" });
 
   // Type safe
   console.log(result);
