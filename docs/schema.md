@@ -65,7 +65,7 @@ EnqueueSubscriptionMessage({
 GetMessages({
   subscriptionId: string,
   partitionKey: string,
-  batchSize: string
+  batchSize: number
 }): Promise<Message[]>
 
 Ack({

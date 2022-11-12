@@ -1,11 +1,11 @@
 # subpub
 
 - [x] Implement & stub schemas in tRPC for `router`
-- [ ] Implement & stub schemas in tRPC for `subscription node`
-- [ ] Implement shared message type
+- [x] Implement & stub schemas in tRPC for `subscription node`
+- [x] Implement shared message type
 - [x] Implement config
-- [ ] Implement client-subscriber
-- [ ] Implement client-publisher
+- [x] Implement client-subscriber
+- [x] Implement client-publisher
 
 ## Router
 

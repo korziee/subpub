@@ -10,13 +10,21 @@ const router = createTRPCProxyClient<RouterRouter>({
 });
 
 async function main() {
-  const messageId = await router.publishToTopic.mutate({
+  const batchSize = 1000;
+
+  const messages = [];
+  const batchId = Math.random().toString(32).split(".")[1];
+
+  for (let i = 0; i < batchSize; i += 1) {
+    messages.push(`number-${batchId}-${i}`);
+  }
+
+  await router.publishToTopic.mutate({
     topicName: "numbers-topic",
-    messageData: "1",
+    messageData: messages,
   });
 
-  // Type safe
-  console.log(`Published message:`, messageId);
+  console.log(`Published ${batchSize} messages on batch: ${batchId}`);
 }
 
 main();

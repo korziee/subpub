@@ -8,10 +8,12 @@ const t = initTRPC.create();
 
 const router = t.router({
   publishToTopic: t.procedure
-    .input(z.object({ topicName: z.string(), messageData: z.string() }))
+    .input(
+      z.object({ topicName: z.string(), messageData: z.array(z.string()) })
+    )
     .mutation(async (req) => {
       console.log("publishToTopic::req", req);
-      return "message-id";
+      return ["message-id"];
     }),
   getMessages: t.procedure
     .input(z.object({ subscriptionName: z.string(), batchSize: z.number() }))
