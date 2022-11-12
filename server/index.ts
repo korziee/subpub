@@ -1,17 +1,18 @@
-import { initTRPC } from '@trpc/server';
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
+import { initTRPC } from "@trpc/server";
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { z } from "zod";
 
 export type AppRouter = typeof appRouter;
 
 const t = initTRPC.create();
 
-const publicProcedure = t.procedure;
-const router = t.router;
-
-const appRouter = router({
-  greet: publicProcedure
+const appRouter = t.router({
+  zod: t.procedure.input(z.object({ name: z.string() })).mutation((req) => {
+    return req.input.name;
+  }),
+  greet: t.procedure
     .input((val: unknown) => {
-      if (typeof val === 'string') return val;
+      if (typeof val === "string") return val;
       throw new Error(`Invalid input: ${typeof val}`);
     })
     .query(({ input }) => ({ greeting: `hello, ${input}!` })),
