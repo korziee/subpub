@@ -26,7 +26,7 @@ describe("MessagesDb", () => {
         data: "hello",
         deliveryAttempts: 0,
         id: "msg-1",
-        receiptId: "subscription-1-partition-1-msg-1",
+        receiptId: "subscription-1:partition-1:msg-1",
       },
     ]);
 
