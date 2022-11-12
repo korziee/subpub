@@ -1,6 +1,10 @@
 import { initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
+import { getPartitionDb, loadPartitionDbs } from "./partitions";
+
+// construct DBs for all partitions we are responsible for
+loadPartitionDbs();
 
 export type SubscriptionNodeRouter = typeof subscriptionNodeRouter;
 
@@ -12,14 +16,19 @@ const subscriptionNodeRouter = t.router({
       z.array(
         z.object({
           subscriptionId: z.string(),
-          partitionKey: z.string(),
+          partitionId: z.string(),
           messageId: z.string(),
           messageData: z.string(),
         })
       )
     )
-    .mutation(async (req) => {
-      console.log("enqueueSubscriptionMessage::req", req.input);
+    .mutation((req) => {
+      for (const messageData of req.input) {
+        getPartitionDb(
+          messageData.subscriptionId,
+          messageData.partitionId
+        ).enqueueMessage(messageData.messageId, messageData.messageData);
+      }
     }),
 
   getMessages: t.procedure
@@ -31,7 +40,10 @@ const subscriptionNodeRouter = t.router({
       })
     )
     .query(async (req) => {
-      console.log("getMessages::req", req);
+      return getPartitionDb(
+        req.input.subscriptionId,
+        req.input.partitionKey
+      ).getMessages(req.input.batchSize);
     }),
 
   ack: t.procedure
@@ -43,7 +55,10 @@ const subscriptionNodeRouter = t.router({
       })
     )
     .mutation(async (req) => {
-      console.log("ack::req", req);
+      return getPartitionDb(
+        req.input.subscriptionId,
+        req.input.partitionKey
+      ).ackMessage(req.input.messageId);
     }),
 
   modifyAckDeadline: t.procedure
@@ -56,7 +71,13 @@ const subscriptionNodeRouter = t.router({
       })
     )
     .mutation(async (req) => {
-      console.log("ack::modifyAckDeadline", req);
+      return getPartitionDb(
+        req.input.subscriptionId,
+        req.input.partitionKey
+      ).modifyMessageAckDeadline(
+        req.input.messageId,
+        req.input.deadlineMilliseconds
+      );
     }),
 
   getPartitionStatistics: t.procedure
@@ -67,12 +88,15 @@ const subscriptionNodeRouter = t.router({
       })
     )
     .query(async (req) => {
-      console.log("ack::getPartitionStatistics", req);
+      const db = getPartitionDb(
+        req.input.subscriptionId,
+        req.input.partitionKey
+      );
 
       return {
-        pendingMessageCount: 0,
-        inflightMessageCount: 0,
-        oldestMessageDate: new Date(),
+        pendingMessagesCount: db.pendingMessagesCount,
+        inflightMessagesCount: db.inflightMessagesCount,
+        oldestMessageTimestamp: db.oldestMessageTimestamp,
       };
     }),
 });

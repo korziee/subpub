@@ -19,7 +19,8 @@ services:
     volumes:
       - "./:/app"
     environment:
-      HELLO: "WORLD"
+      NODE_NAME: "node-1"
+
   sub-node-2:
     image: node:18-alpine
     command: "yarn start:sub-node"
@@ -27,4 +28,4 @@ services:
     volumes:
       - "./:/app"
     environment:
-      HELLO: "WORLD"
+      NODE_NAME: "node-2"

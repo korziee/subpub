@@ -3,8 +3,10 @@ export type Config = {
     name: string;
     subscriptions: Array<{
       name: string;
+      maxDeliveries: number;
+      ackDeadlineMilliseconds: number;
       partitions: Array<{
-        key: string;
+        id: string;
         // hostname, route, etc.
         node: string;
       }>;
@@ -19,23 +21,31 @@ export const config: Config = {
       subscriptions: [
         {
           name: "numbers-subscription-1",
+          maxDeliveries: 3,
+          ackDeadlineMilliseconds: 10 * 1000,
           partitions: [
             {
-              key: "partition-1",
+              id: "partition-1",
               node: "node-1",
             },
             {
-              key: "partition-2",
+              id: "partition-2",
               node: "node-2",
             },
           ],
         },
         {
           name: "numbers-subscription-2",
+          maxDeliveries: 3,
+          ackDeadlineMilliseconds: 10 * 1000,
           partitions: [
             {
-              key: "partition-1",
+              id: "partition-1",
               node: "node-1",
+            },
+            {
+              id: "partition-2",
+              node: "node-2",
             },
           ],
         },
