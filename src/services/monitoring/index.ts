@@ -1,7 +1,6 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import { z } from "zod";
 
 import type { SubscriptionNodeRouter } from "../subscription-node";
 import { Config, config } from "../config";
@@ -70,3 +69,44 @@ async function printPartitionStats() {
 }
 
 printPartitionStats().catch(console.error);
+
+// api
+// ---------------------
+export type MonitoringRouter = typeof monitoringRouter;
+
+const t = initTRPC.create();
+
+const monitoringRouter = t.router({
+  getStats: t.procedure.query(async (req) => {
+    const allStats: any = [];
+
+    for (const subscription of subscriptions.values()) {
+      for (const partition of subscription.partitions) {
+        const node = nodes.get(partition.node);
+
+        const stats = await node!.getPartitionStatistics.query({
+          subscriptionName: subscription.name,
+          partitionId: partition.id,
+        });
+        allStats.push({
+          subscriptionName: subscription.name,
+          partitionId: partition.id,
+          node: partition.node,
+          stats,
+        });
+      }
+    }
+
+    return allStats;
+  }),
+});
+
+createHTTPServer({
+  router: monitoringRouter,
+  createContext() {
+    return {};
+  },
+  onError: (err) => {
+    console.error("Error on maintenance Node", err);
+  },
+}).listen(2022);
