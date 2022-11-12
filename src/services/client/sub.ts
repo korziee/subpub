@@ -10,29 +10,14 @@ const router = createTRPCProxyClient<RouterRouter>({
   ],
 });
 
-let nodes = [
-  createTRPCProxyClient<SubscriptionNodeRouter>({
-    links: [
-      httpBatchLink({
-        url: "http://sub-node-1:2022",
-      }),
-    ],
-  }),
-  createTRPCProxyClient<SubscriptionNodeRouter>({
-    links: [
-      httpBatchLink({
-        url: "http://sub-node-2:2022",
-      }),
-    ],
-  }),
-];
-
 async function main() {
-  const a = await router.zod.mutate({ name: "aaa" });
-  const b = await nodes[0].subNodeThing.mutate({ id: "hello" });
+  const messages = await router.getMessages.query({
+    subscriptionName: "numbers-subscription",
+    batchSize: 10,
+  });
 
   // Type safe
-  console.log(a, b);
+  console.log(`Got ${messages.length} messages:`, messages);
 }
 
 main();

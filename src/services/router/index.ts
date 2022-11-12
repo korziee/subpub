@@ -7,15 +7,36 @@ export type RouterRouter = typeof router;
 const t = initTRPC.create();
 
 const router = t.router({
-  zod: t.procedure.input(z.object({ name: z.string() })).mutation((req) => {
-    return req.input.name;
-  }),
-  greet: t.procedure
-    .input((val: unknown) => {
-      if (typeof val === "string") return val;
-      throw new Error(`Invalid input: ${typeof val}`);
-    })
-    .query(({ input }) => ({ greeting: `hello, ${input}!` })),
+  publishToTopic: t.procedure
+    .input(z.object({ topicName: z.string(), messageData: z.string() }))
+    .mutation(async (req) => {
+      console.log("publishToTopic::req", req);
+      return "message-id";
+    }),
+  getMessages: t.procedure
+    .input(z.object({ subscriptionName: z.string(), batchSize: z.number() }))
+    .query(async (req) => {
+      console.log("getMessages::req", req);
+      return [
+        {
+          data: "data",
+          receiptId: "receiptId",
+          deliveryAttempts: 0,
+        },
+      ];
+    }),
+  ack: t.procedure
+    .input(z.object({ receiptId: z.string() }))
+    .mutation(async (req) => {
+      console.log("ack::req", req);
+    }),
+  modifyAckDeadline: t.procedure
+    .input(
+      z.object({ receiptId: z.string(), deadlineMilliseconds: z.number() })
+    )
+    .mutation(async (req) => {
+      console.log("modifyAckDeadline::req", req);
+    }),
 });
 
 createHTTPServer({

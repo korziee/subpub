@@ -14,12 +14,12 @@ type Message = {
 
 ```TypeScript
 PublishToTopic({
-  topic: string,
+  topicName: string,
   messageData: string
 }): Promise<string>; // messageId
 
 GetMessages({
-  subscription: string,
+  subscriptionName: string,
   batchSize: number
 }): Promise<Message[]>
 
