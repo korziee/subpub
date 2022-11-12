@@ -57,33 +57,33 @@ type Config = {
 ```TypeScript
 EnqueueSubscriptionMessages({
   subscriptionId: string,
-  partitionKey: string,
+  partitionId: string,
   messageId: string,
   messageData: string
 }): Promise<void>
 
 GetMessages({
   subscriptionId: string,
-  partitionKey: string,
+  partitionId: string,
   batchSize: number
 }): Promise<Message[]>
 
 Ack({
   subscriptionId: string,
-  partitionKey: string,
+  partitionId: string,
   messageId: string
 }): Promise<void>
 
 ModifyAckDeadline({
   subscriptionId: string,
-  partitionKey: string,
+  partitionId: string,
   messageId: string,
   deadlineMilliseconds: number
 }): Promise<void>
 
 GetPartitionStatistics({
   subscriptionId: string,
-  partitionKey: string
+  partitionId: string
 }): Promise<{
   pendingMessageCount: number,
   inflightMessageCount: number,

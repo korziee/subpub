@@ -37,14 +37,14 @@ const subscriptionNodeRouter = t.router({
     .input(
       z.object({
         subscriptionId: z.string(),
-        partitionKey: z.string(),
+        partitionId: z.string(),
         batchSize: z.number(),
       })
     )
     .query(async (req) => {
       const db = getPartitionDb(
         req.input.subscriptionId,
-        req.input.partitionKey
+        req.input.partitionId
       );
 
       return db.getMessages(req.input.batchSize);
@@ -54,14 +54,14 @@ const subscriptionNodeRouter = t.router({
     .input(
       z.object({
         subscriptionId: z.string(),
-        partitionKey: z.string(),
+        partitionId: z.string(),
         messageId: z.string(),
       })
     )
     .mutation(async (req) => {
       const db = getPartitionDb(
         req.input.subscriptionId,
-        req.input.partitionKey
+        req.input.partitionId
       );
 
       db.ackMessage(req.input.messageId);
@@ -71,7 +71,7 @@ const subscriptionNodeRouter = t.router({
     .input(
       z.object({
         subscriptionId: z.string(),
-        partitionKey: z.string(),
+        partitionId: z.string(),
         messageId: z.string(),
         deadlineMilliseconds: z.number(),
       })
@@ -79,7 +79,7 @@ const subscriptionNodeRouter = t.router({
     .mutation(async (req) => {
       const db = getPartitionDb(
         req.input.subscriptionId,
-        req.input.partitionKey
+        req.input.partitionId
       );
 
       db.modifyMessageAckDeadline(

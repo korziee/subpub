@@ -21,4 +21,4 @@
 - [x] Router:ModifyAckDeadline RPC
 - [x] Node:ModifyAckDeadline RPC
 
-- [ ] Node:GetPartitionStatistics RPC
+- [x] Node:GetPartitionStatistics RPC

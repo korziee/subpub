@@ -125,7 +125,7 @@ export const router = t.router({
 
       const msgs = await nodes.get(partition.node)!.getMessages.query({
         batchSize: req.input.batchSize,
-        partitionKey: partition.id,
+        partitionId: partition.id,
         subscriptionId: req.input.subscriptionName,
       });
 
@@ -161,7 +161,7 @@ export const router = t.router({
       await nodes.get(partition.node)?.ack.mutate({
         messageId,
         subscriptionId,
-        partitionKey: partition.id,
+        partitionId: partition.id,
       });
     }),
 
@@ -196,7 +196,7 @@ export const router = t.router({
       await nodes.get(partition.node)?.modifyAckDeadline.mutate({
         messageId,
         subscriptionId,
-        partitionKey: partition.id,
+        partitionId: partition.id,
         deadlineMilliseconds: req.input.deadlineMilliseconds,
       });
     }),
