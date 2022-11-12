@@ -29,3 +29,12 @@ services:
       - "./:/app"
     environment:
       NODE_NAME: "node-2"
+
+  next:
+    image: node:18-alpine
+    command: "yarn start:next"
+    ports:
+      - 3000:3000
+    working_dir: "/app"
+    volumes:
+      - "./:/app"

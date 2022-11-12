@@ -9,16 +9,16 @@
 
 ## Router
 
-- [ ] Router:PublishToTopic RPC
-- [ ] Node:EnqueueSubscriptionMessage RPC
+- [x] Router:PublishToTopic RPC
+- [x] Node:EnqueueSubscriptionMessage RPC
 
-- [ ] Router:GetMessages RPC
-- [ ] Node:GetMessages RPC
+- [x] Router:GetMessages RPC
+- [x] Node:GetMessages RPC
 
-- [ ] Router:Ack RPC
-- [ ] Node:Ack RPC
+- [x] Router:Ack RPC
+- [x] Node:Ack RPC
 
-- [ ] Router:ModifyAckDeadline RPC
-- [ ] Node:ModifyAckDeadline RPC
+- [x] Router:ModifyAckDeadline RPC
+- [x] Node:ModifyAckDeadline RPC
 
 - [ ] Node:GetPartitionStatistics RPC
