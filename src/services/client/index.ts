@@ -16,4 +16,6 @@ async function main() {
   console.log(result);
 }
 
-main();
+function sayHello() {
+  console.log("Hello");
+}

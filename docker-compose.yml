@@ -1,10 +1,16 @@
 services:
+  client:
+    image: node:18-alpine
+    working_dir: '/app'
+    volumes:
+      - './:/app'
+
   router-1:
     image: node:18-alpine
     command: "yarn start:router"
     working_dir: "/app"
     volumes:
-      - "./:/app"
+
   sub-node-1:
     image: node:18-alpine
     command: "yarn start:sub-node"
