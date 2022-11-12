@@ -42,14 +42,49 @@ async function subscribe(
   }
 }
 
+let processedMessagesLastSecond = 0;
+let processedMessages = 0;
+
+setInterval(() => {
+  processedMessagesLastSecond = processedMessages;
+  processedMessages = 0;
+  console.log(processedMessagesLastSecond, "messages/second");
+}, 1000);
+
 async function main() {
-  subscribe("numbers-subscription-1", 10, async ({ message }) => {
+  subscribe("numbers-subscription-1", 100, async ({ message }) => {
     // simulate slow consumers
-    await setTimeout(Math.random() * 100);
+    // await setTimeout(Math.random() * 100);
+    processedMessages++;
 
     const number = message.data;
-    console.log("Processing number: ", number);
+    console.log(
+      "Processing number: ",
+      number,
+      processedMessages,
+      processedMessagesLastSecond
+    );
   }).catch(console.error);
 }
 
-main();
+async function fastMain() {
+  while (true) {
+    const messages = await router.getMessages.query({
+      subscriptionName: "numbers-subscription-1",
+      batchSize: 500,
+    });
+
+    if (messages.length === 0) {
+      await setTimeout(100);
+      continue;
+    }
+
+    await messages.map((message) =>
+      router.ack.mutate({ receiptId: message.receiptId })
+    );
+    processedMessages += messages.length;
+  }
+}
+
+// main();
+fastMain();

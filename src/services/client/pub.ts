@@ -31,7 +31,7 @@ async function main() {
 }
 
 async function trickle() {
-  const batchSize = 5;
+  const batchSize = 100;
 
   while (true) {
     const messages = [];
@@ -46,7 +46,7 @@ async function trickle() {
     });
 
     console.log(`Published ${batchSize} messages on batch: ${batchId}`);
-    await setTimeout(Math.random() * 50);
+    // await setTimeout(Math.random() * 50);
   }
 }
 

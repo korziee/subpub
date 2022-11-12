@@ -3,7 +3,7 @@ import { Message } from "../../Message";
 import { Config } from "../config";
 import { clearTimeout } from "timers";
 
-const DB_MAINTENANCE_PERIOD = 1000;
+const DB_MAINTENANCE_PERIOD = 15 * 1000;
 
 // an instance of MessagesDb is created for every subscription partition
 // this represents a SINGLE partition
