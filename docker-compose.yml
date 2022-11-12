@@ -19,6 +19,15 @@ services:
     volumes:
       - "./:/app"
 
+  next:
+    image: node:18-alpine
+    command: "yarn start:next"
+    ports:
+      - 3000:3000
+    working_dir: "/app"
+    volumes:
+      - "./:/app"
+
   sub-node-1:
     image: node:18-alpine
     command: "yarn start:sub-node"
@@ -37,11 +46,58 @@ services:
     environment:
       NODE_NAME: "node-2"
 
-  next:
+
+  sub-node-3:
     image: node:18-alpine
-    command: "yarn start:next"
-    ports:
-      - 3000:3000
+    command: "yarn start:sub-node"
     working_dir: "/app"
     volumes:
       - "./:/app"
+    environment:
+      NODE_NAME: "node-3"
+
+  sub-node-4:
+    image: node:18-alpine
+    command: "yarn start:sub-node"
+    working_dir: "/app"
+    volumes:
+      - "./:/app"
+    environment:
+      NODE_NAME: "node-4"
+
+  sub-node-5:
+    image: node:18-alpine
+    command: "yarn start:sub-node"
+    working_dir: "/app"
+    volumes:
+      - "./:/app"
+    environment:
+      NODE_NAME: "node-5"
+
+  sub-node-6:
+    image: node:18-alpine
+    command: "yarn start:sub-node"
+    working_dir: "/app"
+    volumes:
+      - "./:/app"
+    environment:
+      NODE_NAME: "node-6"
+
+  sub-node-7:
+    image: node:18-alpine
+    command: "yarn start:sub-node"
+    working_dir: "/app"
+    volumes:
+      - "./:/app"
+    environment:
+      NODE_NAME: "node-7"
+
+  sub-node-8:
+    image: node:18-alpine
+    command: "yarn start:sub-node"
+    working_dir: "/app"
+    volumes:
+      - "./:/app"
+    environment:
+      NODE_NAME: "node-8"
+

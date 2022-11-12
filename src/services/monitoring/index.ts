@@ -65,7 +65,7 @@ async function printPartitionStats() {
   }
   console.log("-------------------------------------------------------");
 
-  setTimeout(() => printPartitionStats(), 100);
+  setTimeout(() => printPartitionStats(), 2000);
 }
 
 printPartitionStats().catch(console.error);
