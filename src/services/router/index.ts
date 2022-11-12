@@ -8,12 +8,15 @@ import { Config, config } from "../config";
 
 const nodeIds = new Set<string>();
 
+const topics = new Map<string, Config["topics"][number]>();
+
 const subscriptions = new Map<
   string,
   Config["topics"][number]["subscriptions"][number] & { topicName: string }
 >();
 
 config.topics.forEach((topic) => {
+  topics.set(topic.name, topic);
   topic.subscriptions.forEach((sub) => {
     subscriptions.set(sub.name, {
       ...sub,
@@ -53,7 +56,7 @@ export const router = t.router({
       z.object({ topicName: z.string(), messageData: z.array(z.string()) })
     )
     .mutation(async (req) => {
-      const topic = config.topics.find((t) => t.name === req.input.topicName);
+      const topic = topics.get(req.input.topicName);
 
       if (typeof topic === "undefined") {
         throw new TRPCError({
