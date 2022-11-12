@@ -2,11 +2,11 @@ import { initTRPC } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
 
-export type AppRouter = typeof appRouter;
+export type RouterRouter = typeof router;
 
 const t = initTRPC.create();
 
-const appRouter = t.router({
+const router = t.router({
   zod: t.procedure.input(z.object({ name: z.string() })).mutation((req) => {
     return req.input.name;
   }),
@@ -19,7 +19,7 @@ const appRouter = t.router({
 });
 
 createHTTPServer({
-  router: appRouter,
+  router,
   createContext() {
     return {};
   },

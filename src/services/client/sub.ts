@@ -1,8 +1,8 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import type { AppRouter } from "../router";
-import type { SubNodeRouter } from "../sub-node";
+import type { RouterRouter } from "../router";
+import type { SubscriptionNodeRouter } from "../subscription-node";
 
-const router = createTRPCProxyClient<AppRouter>({
+const router = createTRPCProxyClient<RouterRouter>({
   links: [
     httpBatchLink({
       url: "http://router-1:2022",
@@ -11,14 +11,14 @@ const router = createTRPCProxyClient<AppRouter>({
 });
 
 let nodes = [
-  createTRPCProxyClient<SubNodeRouter>({
+  createTRPCProxyClient<SubscriptionNodeRouter>({
     links: [
       httpBatchLink({
         url: "http://sub-node-1:2022",
       }),
     ],
   }),
-  createTRPCProxyClient<SubNodeRouter>({
+  createTRPCProxyClient<SubscriptionNodeRouter>({
     links: [
       httpBatchLink({
         url: "http://sub-node-2:2022",

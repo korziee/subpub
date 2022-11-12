@@ -13,7 +13,7 @@
     "client:sub": "nodemon ./src/services/client/sub.ts",
     "client-pub": "nodemon ./src/services/client/pub.ts",
     "start:router": "nodemon ./src/services/router/index.ts",
-    "start:sub-node": "nodemon --watch ./src/services/sub-node ./src/services/sub-node/index.ts",
+    "start:sub-node": "nodemon --watch ./src/services/subscription-node ./src/services/subscription-node/index.ts",
     "test": "jest"
   },
   "dependencies": {
