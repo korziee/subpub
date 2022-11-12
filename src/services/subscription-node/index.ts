@@ -106,4 +106,7 @@ createHTTPServer({
   createContext() {
     return {};
   },
+  onError: (err) => {
+    console.error("Error on Subscription Node", err);
+  },
 }).listen(2022);

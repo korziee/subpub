@@ -43,7 +43,7 @@ async function subscribe(
 }
 
 async function main() {
-  subscribe("numbers-subscription", 10, async (msg) => {
+  subscribe("numbers-subscription-1", 10, async (msg) => {
     const number = msg.message;
     console.log("Processing number: ", number);
   }).catch(console.error);

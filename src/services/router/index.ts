@@ -58,7 +58,7 @@ const router = t.router({
         string,
         Array<{
           subscriptionId: string;
-          partitionKey: string;
+          partitionId: string;
           messageId: string;
           messageData: string;
         }>
@@ -76,7 +76,7 @@ const router = t.router({
 
           msgs.push({
             subscriptionId: sub.name,
-            partitionKey: partition.key,
+            partitionId: partition.id,
             messageId: msgId,
             messageData: msg,
           });
@@ -148,6 +148,6 @@ createHTTPServer({
     return {};
   },
   onError: (err) => {
-    console.error("THER WAS AN ERROR", err);
+    console.error("Error on Router", err);
   },
 }).listen(2022);
