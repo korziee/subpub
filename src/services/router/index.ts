@@ -168,7 +168,7 @@ const router = t.router({
     )
     .mutation(async (req) => {
       const [subscriptionId, partitionId, messageId] =
-        req.input.receiptId.split("-");
+        req.input.receiptId.split(":");
 
       const subscription = subscriptions.get(subscriptionId);
 
