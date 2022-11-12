@@ -11,7 +11,13 @@
     "logs": "docker compose logs -f",
     "start:router": "nodemon ./src/services/router/index.ts",
     "start:sub-node": "nodemon ./src/services/sub-node/index.ts",
+    "client": "nodemon ./src/services/client/index.ts",
     "test": "jest"
+  },
+  "dependencies": {
+    "@trpc/client": "^10.0.0-rc.7",
+    "@trpc/server": "^10.0.0-rc.7",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
