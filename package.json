@@ -14,6 +14,7 @@
     "client:pub": "nodemon --watch ./src/services/client/pub.ts ./src/services/client/pub.ts",
     "start:router": "nodemon --ignore ./src/services/client ./src/services/router/index.ts",
     "start:sub-node": "nodemon --watch ./src/services/subscription-node ./src/services/subscription-node/index.ts",
+    "start:monitoring": "nodemon ./src/services/monitoring/index.ts",
     "start:next": "next dev",
     "test": "jest"
   },

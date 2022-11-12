@@ -23,7 +23,7 @@ async function subscribe(
     });
 
     if (messages.length === 0) {
-      await setTimeout(1000);
+      await setTimeout(100);
       continue;
     }
 
@@ -43,8 +43,11 @@ async function subscribe(
 }
 
 async function main() {
-  subscribe("numbers-subscription-1", 10, async (msg) => {
-    const number = msg.message;
+  subscribe("numbers-subscription-1", 10, async ({ message }) => {
+    // simulate slow consumers
+    await setTimeout(Math.random() * 100);
+
+    const number = message.data;
     console.log("Processing number: ", number);
   }).catch(console.error);
 }

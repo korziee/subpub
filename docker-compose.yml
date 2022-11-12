@@ -12,6 +12,13 @@ services:
     volumes:
       - "./:/app"
 
+  monitoring:
+    image: node:18-alpine
+    command: "yarn start:monitoring"
+    working_dir: "/app"
+    volumes:
+      - "./:/app"
+
   sub-node-1:
     image: node:18-alpine
     command: "yarn start:sub-node"

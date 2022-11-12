@@ -91,14 +91,14 @@ const subscriptionNodeRouter = t.router({
   getPartitionStatistics: t.procedure
     .input(
       z.object({
-        subscriptionId: z.string(),
-        partitionKey: z.string(),
+        subscriptionName: z.string(),
+        partitionId: z.string(),
       })
     )
     .query(async (req) => {
       const db = getPartitionDb(
-        req.input.subscriptionId,
-        req.input.partitionKey
+        req.input.subscriptionName,
+        req.input.partitionId
       );
 
       return {
