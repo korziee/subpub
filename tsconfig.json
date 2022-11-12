@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
+    "incremental": true,
+    "target": "es2016",
+    "module": "commonjs",
+    "outDir": "./dist",
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "outDir": "dist"
-  },
-  "include": ["server", "client"]
+    "skipLibCheck": true
+  }
 }

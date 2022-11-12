@@ -1,28 +1,26 @@
 {
-  "name": "subpub",
+  "name": "sub-pub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
   "private": true,
-  "engines": {
-    "node": ">= 18"
-  },
   "scripts": {
-    "dev:server": "tsx watch server",
-    "dev:client": "wait-port 2022 && tsx watch client",
-    "dev": "run-p dev:* --print-label",
-    "start": "node dist/server",
-    "build": "tsc",
-    "test-dev": "start-server-and-test 'tsx server' 2022 'tsx client'",
-    "test-start": "start-server-and-test 'node dist/server' 2022 'node dist/client'"
+    "build": "tsc -b",
+    "start": "docker compose up -d",
+    "stop": "docker compose stop",
+    "logs": "docker compose logs -f",
+    "start:router": "nodemon ./src/services/router/index.ts",
+    "start:sub-node": "nodemon ./src/services/sub-node/index.ts",
+    "test": "jest"
   },
-  "workspaces": [
-    "client",
-    "server"
-  ],
   "devDependencies": {
-    "@types/node": "^18.7.20",
-    "npm-run-all": "^4.1.5",
-    "start-server-and-test": "^1.12.0",
-    "tsx": "^3.9.0",
-    "typescript": "^4.8.3",
-    "wait-port": "^1.0.1"
+    "@types/jest": "^29.2.2",
+    "@types/node": "^18.11.9",
+    "jest": "^29.3.1",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
   }
 }

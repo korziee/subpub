@@ -1,0 +1,15 @@
+services:
+  router-1:
+    image: node:18-alpine
+    command: 'yarn start:router'
+    working_dir: '/app'
+    volumes:
+      - './:/app'
+  sub-node-1:
+    image: node:18-alpine
+    command: 'yarn start:sub-node'
+    working_dir: '/app'
+    volumes:
+      - './:/app'
+    environment:
+      HELLO: 'WORLD'
