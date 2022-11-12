@@ -19,7 +19,7 @@ const subscriptionNodeRouter = t.router({
       )
     )
     .mutation(async (req) => {
-      console.log("enqueueSubscriptionMessage::req", req);
+      console.log("enqueueSubscriptionMessage::req", req.input);
     }),
 
   getMessages: t.procedure

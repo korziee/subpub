@@ -10,9 +10,9 @@
     "stop": "docker compose stop",
     "logs": "docker compose logs -f",
     "repl": "docker-compose run client sh",
-    "client:sub": "nodemon ./src/services/client/sub.ts",
-    "client:pub": "nodemon ./src/services/client/pub.ts",
-    "start:router": "nodemon ./src/services/router/index.ts",
+    "client:sub": "nodemon --watch ./src/services/client ./src/services/client/sub.ts",
+    "client:pub": "nodemon --watch ./src/services/client ./src/services/client/pub.ts",
+    "start:router": "nodemon --ignore ./src/services/client ./src/services/router/index.ts",
     "start:sub-node": "nodemon --watch ./src/services/subscription-node ./src/services/subscription-node/index.ts",
     "test": "jest"
   },

@@ -1,9 +1,40 @@
-import { initTRPC } from "@trpc/server";
+import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { z } from "zod";
 
-export type RouterRouter = typeof router;
+import type { SubscriptionNodeRouter } from "../subscription-node";
+import { config } from "../config";
 
+const nodeIds = new Set<string>();
+
+config.topics.forEach((topic) => {
+  topic.subscriptions.forEach((sub) => {
+    sub.partitions.forEach((part) => {
+      nodeIds.add(part.node);
+    });
+  });
+});
+
+const nodes = new Map<
+  string,
+  ReturnType<typeof createTRPCProxyClient<SubscriptionNodeRouter>>
+>();
+
+[...nodeIds.values()].map((node) => {
+  nodes.set(
+    node,
+    createTRPCProxyClient<SubscriptionNodeRouter>({
+      links: [
+        httpBatchLink({
+          url: `http://sub-${node}:2022`,
+        }),
+      ],
+    })
+  );
+});
+
+export type RouterRouter = typeof router;
 const t = initTRPC.create();
 
 const router = t.router({
@@ -12,9 +43,55 @@ const router = t.router({
       z.object({ topicName: z.string(), messageData: z.array(z.string()) })
     )
     .mutation(async (req) => {
-      console.log("publishToTopic::req", req);
-      return ["message-id"];
+      const topic = config.topics.find((t) => t.name === req.input.topicName);
+
+      if (typeof topic === "undefined") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Could not find topic with name: ${req.input.topicName}`,
+        });
+      }
+
+      let msgIds: string[] = [];
+
+      const nodeMsgs = new Map<
+        string,
+        Array<{
+          subscriptionId: string;
+          partitionKey: string;
+          messageId: string;
+          messageData: string;
+        }>
+      >([...nodeIds.values()].map((id) => [id, []]));
+
+      topic.subscriptions.forEach((sub) => {
+        req.input.messageData.forEach((msg) => {
+          const partitionIndex = Math.floor(
+            Math.random() * sub.partitions.length
+          );
+          const partition = sub.partitions[partitionIndex];
+          const msgs = nodeMsgs.get(partition.node)!;
+          const msgId = Math.random().toString(32).split(".")[1];
+          msgIds.push(msgId);
+
+          msgs.push({
+            subscriptionId: sub.name,
+            partitionKey: partition.key,
+            messageId: msgId,
+            messageData: msg,
+          });
+        });
+      });
+
+      await Promise.all(
+        [...nodeMsgs.entries()].map(async ([node, msgs]) => {
+          return nodes.get(node)?.enqueueSubscriptionMessages.mutate(msgs);
+        })
+      );
+
+      return msgIds;
     }),
+
   getMessages: t.procedure
     .input(z.object({ subscriptionName: z.string(), batchSize: z.number() }))
     .query(async (req) => {
@@ -45,5 +122,8 @@ createHTTPServer({
   router,
   createContext() {
     return {};
+  },
+  onError: (err) => {
+    console.error("THER WAS AN ERROR", err);
   },
 }).listen(2022);

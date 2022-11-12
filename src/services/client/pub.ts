@@ -10,7 +10,7 @@ const router = createTRPCProxyClient<RouterRouter>({
 });
 
 async function main() {
-  const batchSize = 1000;
+  const batchSize = 2;
 
   const messages = [];
   const batchId = Math.random().toString(32).split(".")[1];

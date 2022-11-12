@@ -43,7 +43,7 @@ type Config = {
     subscriptions: Array<{
       name: string,
       partitions: Array<{
-        key: string,
+        id: string,
         // hostname, route, etc.
         node: string
       }>
@@ -55,7 +55,7 @@ type Config = {
 ## Internal
 
 ```TypeScript
-EnqueueSubscriptionMessage({
+EnqueueSubscriptionMessages({
   subscriptionId: string,
   partitionKey: string,
   messageId: string,
