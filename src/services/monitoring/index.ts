@@ -76,9 +76,18 @@ export type MonitoringRouter = typeof monitoringRouter;
 
 const t = initTRPC.create();
 
-const monitoringRouter = t.router({
+export const monitoringRouter = t.router({
   getStats: t.procedure.query(async (req) => {
-    const allStats: any = [];
+    const allStats: Array<{
+      subscriptionName: string;
+      partitionId: string;
+      node: string;
+      stats: {
+        pendingMessagesCount: number;
+        inflightMessagesCount: number;
+        oldestMessageTimestamp: number | null;
+      };
+    }> = [];
 
     for (const subscription of subscriptions.values()) {
       for (const partition of subscription.partitions) {
