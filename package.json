@@ -9,8 +9,10 @@
     "start": "docker compose up -d",
     "stop": "docker compose stop",
     "logs": "docker compose logs -f",
-    "repl": "docker-compose run client yarn start:client",
-    "start:client": "yarn build && node -i -e \"$(< ./dist/services/client/index.js)\"",
+    "repl": "docker-compose run client sh",
+    "client:sub": "nodemon ./src/services/client/sub.ts",
+    "client-pub": "nodemon ./src/services/client/pub.ts",
+
     "start:router": "nodemon ./src/services/router/index.ts",
     "start:sub-node": "nodemon ./src/services/sub-node/index.ts",
     "client": "nodemon ./src/services/client/index.ts",
