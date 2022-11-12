@@ -47,7 +47,7 @@ const nodes = new Map<
 export type RouterRouter = typeof router;
 const t = initTRPC.create();
 
-const router = t.router({
+export const router = t.router({
   publishToTopic: t.procedure
     .input(
       z.object({ topicName: z.string(), messageData: z.array(z.string()) })
@@ -133,7 +133,7 @@ const router = t.router({
     .input(z.object({ receiptId: z.string() }))
     .mutation(async (req) => {
       const [subscriptionId, partitionId, messageId] =
-        req.input.receiptId.split("-");
+        req.input.receiptId.split(":");
 
       const subscription = subscriptions.get(subscriptionId);
 
