@@ -1,13 +1,16 @@
 import { config } from "../config";
 import { MessagesDb } from "./MessagesDb";
 
+// creates a MessagesDB for each partition we are responsible for
+// provides method to retrieve DB for a given partition
+
 const nodeName = process.env.NODE_NAME;
 
 // `${subscriptionName}-${partitionId}` -> MessagesDb
 const messageDbs = new Map<string, MessagesDb>();
 
 export function loadPartitionDbs() {
-  // find a list of subscriptions & partitions we are responsible
+  // find a list of subscriptions & partitions we are responsible for
   const mySubscriptionsAndPartitions = config.topics.flatMap((topic) =>
     topic.subscriptions
       .map((subscription) => ({

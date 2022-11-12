@@ -24,10 +24,12 @@ const subscriptionNodeRouter = t.router({
     )
     .mutation((req) => {
       for (const messageData of req.input) {
-        getPartitionDb(
+        const db = getPartitionDb(
           messageData.subscriptionId,
           messageData.partitionId
-        ).enqueueMessage(messageData.messageId, messageData.messageData);
+        );
+
+        db.enqueueMessage(messageData.messageId, messageData.messageData);
       }
     }),
 
@@ -40,10 +42,12 @@ const subscriptionNodeRouter = t.router({
       })
     )
     .query(async (req) => {
-      return getPartitionDb(
+      const db = getPartitionDb(
         req.input.subscriptionId,
         req.input.partitionKey
-      ).getMessages(req.input.batchSize);
+      );
+
+      return db.getMessages(req.input.batchSize);
     }),
 
   ack: t.procedure
@@ -55,10 +59,12 @@ const subscriptionNodeRouter = t.router({
       })
     )
     .mutation(async (req) => {
-      return getPartitionDb(
+      const db = getPartitionDb(
         req.input.subscriptionId,
         req.input.partitionKey
-      ).ackMessage(req.input.messageId);
+      );
+
+      db.ackMessage(req.input.messageId);
     }),
 
   modifyAckDeadline: t.procedure
@@ -71,10 +77,12 @@ const subscriptionNodeRouter = t.router({
       })
     )
     .mutation(async (req) => {
-      return getPartitionDb(
+      const db = getPartitionDb(
         req.input.subscriptionId,
         req.input.partitionKey
-      ).modifyMessageAckDeadline(
+      );
+
+      db.modifyMessageAckDeadline(
         req.input.messageId,
         req.input.deadlineMilliseconds
       );

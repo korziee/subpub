@@ -5,11 +5,19 @@ import { clearTimeout } from "timers";
 
 const DB_MAINTENANCE_PERIOD = 1000;
 
+// an instance of MessagesDb is created for every subscription partition
+// this represents a SINGLE partition
+// responsible for:
+// 1. Storing pending messages
+// 2. Storing in-flight messages
+// 3. Re-enqueuing elapsed messages
+// 4. Dropping messages that elapsed more than deliveryAttempts times
 export class MessagesDb {
   private pendingMessages: Message[] = []; // stored in order from oldest -> newest
   private inFlightMessages = new Map<string, Message>(); // message id -> message
-  public oldestMessageTimestamp: null | number = null; // unix ms
   private maintenanceTimer!: NodeJS.Timer;
+
+  public oldestMessageTimestamp: null | number = null; // unix ms
 
   constructor(
     public partitionId: string,
@@ -29,7 +37,7 @@ export class MessagesDb {
       ackDeadline: 0,
       deliveryAttempts: 0,
       createdDate: Date.now(),
-      receiptId: `${this.subscriptionConfig.name}-${this.partitionId}-${messageId}`,
+      receiptId: `${this.subscriptionConfig.name}:${this.partitionId}:${messageId}`,
     };
     this.pendingMessages.push(message);
   }
