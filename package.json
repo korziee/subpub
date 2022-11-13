@@ -16,7 +16,8 @@
     "start:sub-node": "nodemon --watch ./src/services/subscription-node ./src/services/subscription-node/index.ts",
     "start:monitoring": "nodemon ./src/services/monitoring/index.ts",
     "start:next": "next dev",
-    "test": "jest"
+    "test": "jest",
+    "tui": "go run tui/main.go"
   },
   "dependencies": {
     "@tanstack/react-query": "^4.3.8",

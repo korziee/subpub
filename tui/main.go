@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -13,39 +12,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type model struct {
-	sub       chan response // where we'll receive activity notifications
-	statsMap  map[string]stat
-	responses int // how many responses we've received
-	quitting  bool
+type partition struct {
+	id    string
+	node  string
+	stats partitionStats
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.Batch(
-	// listenForActivity(m.sub), // generate activity
-	// waitForActivity(m.sub),   // wait for activity
-	)
-}
-
-// A command that waits for the activity on a channel.
-func waitForActivity(sub chan response) tea.Cmd {
-	return func() tea.Msg {
-		return response(<-sub)
-	}
-}
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg.(type) {
-	case tea.KeyMsg:
-		m.quitting = true
-		return m, tea.Quit
-	case response:
-		msg.data
-		m.responses++                    // record external activity
-		return m, waitForActivity(m.sub) // wait for next event
-	default:
-		return m, nil
-	}
+type partitionStats struct {
+	PendingMessagesCount   int
+	InflightMessagesCount  int
+	OldestMessageTimestamp time.Duration
 }
 
 type stat struct {
@@ -59,15 +35,27 @@ type stat struct {
 	} `json:"stats"`
 }
 
-type res struct {
-	Data []stat `json:"data"`
-}
-
 type response struct {
-	Result res `json:"result"`
+	Result struct {
+		Data []stat `json:"data"`
+	} `json:"result"`
 }
 
-func read() []stat {
+type model struct {
+	sub           chan map[string]subscription // where we'll receive activity notifications
+	subscriptions map[string]subscription
+	quitting      bool
+}
+
+type subscription struct {
+	name       string
+	partitions []partition
+}
+
+var POLL_TIMER time.Duration = 500
+
+func fetchMonitoringData() map[string]subscription {
+
 	url := "http://localhost:2022/getStats"
 
 	client := http.Client{
@@ -99,19 +87,102 @@ func read() []stat {
 		log.Fatal(jsonErr)
 	}
 
-	return resp.Result.Data
+	// Marshal into map
+
+	subscriptionMap := make(map[string]subscription)
+
+	for _, stat := range resp.Result.Data {
+		val := subscriptionMap[stat.SubscriptionName]
+		ptr := &val
+
+		// fmt.Println(ptr)
+		// TODO: Is there a better way to do this?
+		if ptr.name == "" {
+			val = subscription{
+				name:       stat.SubscriptionName,
+				partitions: []partition{},
+			}
+		}
+
+		val.partitions = append(val.partitions, partition{
+			id:   stat.PartitionId,
+			node: stat.Node,
+			stats: partitionStats{
+				PendingMessagesCount:   stat.Stats.PendingMessagesCount,
+				InflightMessagesCount:  stat.Stats.InflightMessagesCount,
+				OldestMessageTimestamp: stat.Stats.OldestMessageTimestamp,
+			},
+		})
+
+		subscriptionMap[stat.SubscriptionName] = val
+
+	}
+
+	return subscriptionMap
+}
+
+func (m model) Init() tea.Cmd {
+	return tea.Batch(
+		listenForActivity(m.sub), // generate activity
+		waitForActivity(m.sub),   // wait for activity
+	)
+}
+
+func listenForActivity(sub chan map[string]subscription) tea.Cmd {
+	return func() tea.Msg {
+		for {
+			time.Sleep(time.Millisecond * POLL_TIMER)
+			sub <- fetchMonitoringData()
+		}
+	}
+}
+
+// A command that waits for the activity on a channel.
+func waitForActivity(sub chan map[string]subscription) tea.Cmd {
+	return func() tea.Msg {
+		return map[string]subscription(<-sub)
+	}
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg.(type) {
+	case tea.KeyMsg:
+		m.quitting = true
+		return m, tea.Quit
+	case map[string]subscription:
+		m.subscriptions = msg.(map[string]subscription) // record external activity
+		return m, waitForActivity(m.sub)                // wait for next event
+	default:
+		return m, nil
+	}
+}
+
+func (m model) View() string {
+	var msg string
+
+	if m.quitting {
+		return "\n  See you later!\n\n"
+	}
+
+	for _, sub := range m.subscriptions {
+		msg = fmt.Sprintf("Subscription: \"%s\" messages\n\n", sub.name)
+
+		for _, partition := range sub.partitions {
+			msg += fmt.Sprintf("Partition id: \"%s\"\n", partition.id)
+			msg += fmt.Sprintf("Inflight: \"%d\"\n", partition.stats.InflightMessagesCount)
+			msg += fmt.Sprintf("Oldest: \"%d\"\n", partition.stats.OldestMessageTimestamp)
+			msg += fmt.Sprintf("Pending: \"%d\"\n\n", partition.stats.PendingMessagesCount)
+		}
+		msg += "\n\n\n"
+	}
+
+	return msg
 }
 
 func main() {
-	// data := read()
-
-	// fmt.Println(data)
-
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	p := tea.NewProgram(model{
-		sub:      make(chan response),
-		statsMap: make(map[string]stat),
+		sub:           make(chan map[string]subscription),
+		subscriptions: make(map[string]subscription),
 	})
 
 	if _, err := p.Run(); err != nil {
