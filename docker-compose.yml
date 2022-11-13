@@ -15,6 +15,8 @@ services:
   monitoring:
     image: node:18-alpine
     command: "yarn start:monitoring"
+    ports:
+      - 2022:2022
     working_dir: "/app"
     volumes:
       - "./:/app"
@@ -45,7 +47,6 @@ services:
       - "./:/app"
     environment:
       NODE_NAME: "node-2"
-
 
   sub-node-3:
     image: node:18-alpine
@@ -100,4 +101,3 @@ services:
       - "./:/app"
     environment:
       NODE_NAME: "node-8"
-
